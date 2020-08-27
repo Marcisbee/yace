@@ -41,12 +41,40 @@ class Yace {
     Object.assign(this.textarea.style, textareaStyles);
     Object.assign(this.pre.style, preStyles);
 
+    this.addStyles();
+
     this.root.appendChild(this.textarea);
     this.root.appendChild(this.pre);
 
     this.addTextareaEvents();
     this.update({ value: this.options.value });
     this.updateLines();
+  }
+
+  addStyles() {
+    if (document.getElementById("yace-styles")) {
+      return;
+    }
+
+    const styles = document.createElement("style");
+
+    styles.id = "yace-styles";
+    styles.innerHTML =
+      ".yace-line {\
+        counter-increment: yace-line-counter;\
+        position: absolute;\
+        opacity: .3;\
+      }\
+      .yace-line::before {\
+        content: counter(yace-line-counter);\
+        width: 2em;\
+        display: inline-block;\
+        text-align: right;\
+        position: absolute;\
+        right: calc(100% + 11px);\
+      }";
+
+    document.head.appendChild(styles);
   }
 
   addTextareaEvents() {
@@ -102,16 +130,13 @@ class Yace {
     }
 
     const lines = this.value.split("\n");
-    const length = lines.length.toString().length;
-
-    this.root.style.paddingLeft = `${length + 1}ch`;
 
     this.lines.innerHTML = lines
-      .map((line, number) => {
+      .map((line) => {
         // prettier-ignore
-        const lineNumber = `<span class="yace-line" style="position: absolute; opacity: .3; left: 0">${1 + number}</span>`
+        const lineNumber = `<span class="yace-line"></span>`
         // prettier-ignore
-        const lineText = `<span style="color: transparent; pointer-events: none">${escape(line)}</span>`;
+        const lineText = `<span style="visibility: hidden; pointer-events: none">${escape(line)}</span>`;
         return `${lineNumber}${lineText}`;
       })
       .join("\n");
